@@ -90,7 +90,53 @@ export function WebIcon({ className }: IconProps) {
   );
 }
 
+export function ScadaIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="3" y="4" width="18" height="12" rx="1.5" />
+      <path d="M8 20h8M12 16v4" />
+      <path d="M6 12l3-3 2.5 2 3.5-4 3 3" />
+    </svg>
+  );
+}
+
+export function ProductionDataIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M4 20V4" />
+      <path d="M4 20h16" />
+      <rect x="7" y="12" width="3" height="5" />
+      <rect x="12" y="8" width="3" height="9" />
+      <rect x="17" y="5" width="3" height="12" />
+    </svg>
+  );
+}
+
+export function ControlIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="4" y="3.5" width="16" height="17" rx="1.5" />
+      <path d="M8 8h8M8 12h3M13 12h3M8 16h8" />
+    </svg>
+  );
+}
+
+export function ErpLinkIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="3" y="4" width="7" height="7" rx="1" />
+      <rect x="14" y="13" width="7" height="7" rx="1" />
+      <path d="M10 7.5h4a2 2 0 0 1 2 2V13" />
+      <path d="M14 16.5h-4a2 2 0 0 1-2-2V11" />
+    </svg>
+  );
+}
+
 export const MODULE_ICONS: Record<string, (p: IconProps) => React.JSX.Element> = {
+  scada: ScadaIcon,
+  produktionsdaten: ProductionDataIcon,
+  steuerung: ControlIcon,
+  erp: ErpLinkIcon,
   voice: VoiceIcon,
   voiceagent: VoiceAgentIcon,
   mail: MailIcon,

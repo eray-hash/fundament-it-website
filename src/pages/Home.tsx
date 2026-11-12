@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import iconColor from "../assets/logo/fundament-it-icon-color.svg";
 import { MODULES, PAIN_POINTS, BRANCHEN, HOURLY_RATE, type ModuleItem } from "../data/modules";
+import { REFERENZEN } from "../data/industrie";
 import { MODULE_ICONS } from "../components/ModuleIcons";
 
 function DimTick({ label, className = "" }: { label: string; className?: string }) {
@@ -40,6 +42,7 @@ export default function Home() {
       <Hero />
       <FoundationLine />
       <Modules />
+      <IndustrieTeaser />
       <SelfCheck
         branche={branche}
         setBranche={setBranche}
@@ -65,7 +68,7 @@ function Hero() {
 
       <div className="relative mx-auto grid max-w-6xl gap-16 px-6 py-24 md:grid-cols-[1.15fr_0.85fr] md:py-32">
         <div>
-          <DimTick label="Fundament IT — Automatisierung für den Mittelstand" />
+          <DimTick label="Fundament IT — Automatisierung für Büro und Produktion" />
           <h1 className="font-display mt-6 text-[13vw] leading-[0.98] tracking-tight sm:text-6xl md:text-[4.2rem]">
             Bevor man
             <br />
@@ -76,10 +79,11 @@ function Hero() {
             </span>
           </h1>
           <p className="mt-8 max-w-lg text-[15.5px] leading-relaxed text-[var(--ink-dim)]">
-            Egal ob Elektrobetrieb, Praxis, Hotel oder Energieberatung: die immer gleiche
+            Egal ob Elektrobetrieb, Praxis, Hotel oder Produktionswerk: die immer gleiche
             Verwaltungsarbeit — Telefonate protokollieren, E-Mails sortieren, Kunden verwalten,
-            Belege abtippen — lässt sich automatisieren. Wir bauen die Module dafür,
-            zugeschnitten auf euren Betrieb.
+            Belege abtippen — lässt sich automatisieren. In der Produktion gehen wir einen Schritt
+            weiter: mit Leitsystemen, Steuerungstechnik und Datenanbindung bis an die Anlage.
+            Wir bauen die Module dafür, zugeschnitten auf euren Betrieb.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <a
@@ -118,7 +122,7 @@ function FoundationLine() {
   return (
     <div className="relative border-b border-[var(--hairline)] bg-[var(--blueprint-deep)] py-2">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
-        <span className="font-mono text-[10px] tracking-[0.2em] text-[var(--ink-faint)]">GRUND­RISS · MODULE 01–09</span>
+        <span className="font-mono text-[10px] tracking-[0.2em] text-[var(--ink-faint)]">GRUND­RISS · MODULE 01–{String(MODULES.length).padStart(2, "0")}</span>
         <span className="h-px flex-1 mx-4 bg-gradient-to-r from-transparent via-[var(--hairline-strong)] to-transparent" />
         <span className="font-mono text-[10px] tracking-[0.2em] text-[var(--ink-faint)]">ULM · FUNDAMENT-IT.DE</span>
       </div>
@@ -132,33 +136,102 @@ function Modules() {
       <div className="mx-auto max-w-6xl px-6">
         <DimTick label="Was wir bauen" />
         <h2 className="font-display mt-4 max-w-2xl text-4xl leading-tight tracking-tight sm:text-5xl">
-          Neun Module. Ein Fundament.
+          {MODULES.length} Module. Ein Fundament.
         </h2>
         <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-[var(--ink-dim)]">
-          Jedes Modul löst ein konkretes Verwaltungsproblem. Ihr braucht nie alle — der Check
+          Jedes Modul löst ein konkretes Problem. Ihr braucht nie alle — der Check
           unten zeigt, welche für euren Betrieb tatsächlich etwas bringen.
         </p>
 
-        <div className="mt-16 grid gap-px overflow-hidden rounded-sm border border-[var(--hairline)] bg-[var(--hairline)] sm:grid-cols-2 lg:grid-cols-3">
-          {MODULES.map((m) => {
-            const Icon = MODULE_ICONS[m.id];
-            return (
-              <div key={m.id} className="group relative bg-[var(--blueprint)] p-7 transition hover:bg-[var(--surface-hover)]">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] tracking-[0.15em] text-[var(--ink-faint)]">{m.spec}</span>
-                  {Icon && (
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--violet-soft)] to-[var(--turquoise-soft)]">
-                      <Icon className="h-[18px] w-[18px] text-[var(--ink)]" />
-                    </span>
-                  )}
-                </div>
-                <h3 className="font-display mt-3 text-lg font-semibold">{m.label}</h3>
-                <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--ink-dim)]">{m.desc}</p>
-                <span className="pointer-events-none absolute left-0 top-0 h-0 w-px bg-gradient-to-b from-[var(--violet)] to-[var(--turquoise)] transition-all duration-300 group-hover:h-full" />
+        <ModuleGroupGrid
+          title="Büro & Verwaltung"
+          items={MODULES.filter((m) => m.group === "verwaltung")}
+        />
+        <ModuleGroupGrid
+          title="Produktion & Anlagen"
+          note="mit Industriepartner"
+          items={MODULES.filter((m) => m.group === "industrie")}
+        />
+      </div>
+    </section>
+  );
+}
+
+function ModuleGroupGrid({ title, note, items }: { title: string; note?: string; items: ModuleItem[] }) {
+  return (
+    <div className="mt-16 first-of-type:mt-16">
+      <div className="mb-4 flex items-baseline gap-3">
+        <h3 className="font-display text-xl font-semibold">{title}</h3>
+        {note && (
+          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--turquoise-text)]">{note}</span>
+        )}
+      </div>
+      <div className="grid gap-px overflow-hidden rounded-sm border border-[var(--hairline)] bg-[var(--hairline)] sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((m) => {
+          const Icon = MODULE_ICONS[m.id];
+          return (
+            <div key={m.id} className="group relative bg-[var(--blueprint)] p-7 transition hover:bg-[var(--surface-hover)]">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] tracking-[0.15em] text-[var(--ink-faint)]">{m.spec}</span>
+                {Icon && (
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--violet-soft)] to-[var(--turquoise-soft)]">
+                    <Icon className="h-[18px] w-[18px] text-[var(--ink)]" />
+                  </span>
+                )}
               </div>
-            );
-          })}
+              <h3 className="font-display mt-3 text-lg font-semibold">{m.label}</h3>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--ink-dim)]">{m.desc}</p>
+              <span className="pointer-events-none absolute left-0 top-0 h-0 w-px bg-gradient-to-b from-[var(--violet)] to-[var(--turquoise)] transition-all duration-300 group-hover:h-full" />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function IndustrieTeaser() {
+  const logos = REFERENZEN.slice(0, 6);
+  return (
+    <section id="industrie" className="relative border-b border-[var(--hairline)] bg-[var(--blueprint-deep)] py-28">
+      <div className="mx-auto grid max-w-6xl gap-14 px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div>
+          <DimTick label="Für produzierende Betriebe" />
+          <h2 className="font-display mt-4 text-4xl leading-tight tracking-tight sm:text-5xl">
+            Automatisierung bis an die Anlage.
+          </h2>
+          <p className="mt-5 text-[15px] leading-relaxed text-[var(--ink-dim)]">
+            Zusammen mit unserem Industriepartner bringen wir Leitsysteme, Steuerungstechnik,
+            Schaltschrankbau und Datenanbindung in eure Produktion — mit Referenzen von{" "}
+            {REFERENZEN.length} Betrieben und über zehn Jahren Erfahrung in der Industrieautomation.
+          </p>
+          <div className="mt-6 grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {logos.map((r) => (
+              <div key={r.name} className="flex h-14 items-center justify-center rounded-sm bg-white p-2">
+                <img src={r.logo} alt={r.name} loading="lazy" className="max-h-full max-w-full object-contain" />
+              </div>
+            ))}
+          </div>
+          <Link
+            to="/industrie"
+            className="mt-8 inline-block rounded-sm bg-[var(--warm)] px-6 py-3 text-[13px] font-semibold text-white transition hover:bg-[var(--warm-deep)]"
+          >
+            Industrie-Lösungen ansehen
+          </Link>
         </div>
+        <Link to="/industrie" className="group block">
+          <div className="overflow-hidden rounded-sm border border-[var(--hairline-strong)] bg-black shadow-[0_20px_60px_-20px_rgba(30,27,46,0.35)]">
+            <img
+              src="/projekte/scada-extruder.png"
+              alt="SCADA-Leitsystem einer Extruder-Linie"
+              loading="lazy"
+              className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+            />
+          </div>
+          <p className="font-mono mt-3 text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-faint)]">
+            Leitstand-Ansicht einer Extruder-Linie · echtes Projekt
+          </p>
+        </Link>
       </div>
     </section>
   );
@@ -328,7 +401,7 @@ function About() {
           </div>
           <div className="space-y-6 text-[15px] leading-relaxed text-[var(--ink-dim)]">
             <p>
-              Fundament IT ist ein Ein-Personen-Software-Studio aus Ulm, gegründet von{" "}
+              Fundament IT ist ein Software-Studio aus Ulm, gegründet von{" "}
               <span className="text-[var(--ink)]">Eray Yesil</span>. Der Antrieb dahinter: zu viele
               kleine und mittlere Betriebe verlieren jede Woche Stunden an Verwaltungsarbeit, die
               eigentlich niemand mehr von Hand machen müsste — Telefonnotizen, E-Mail-Chaos,
@@ -337,6 +410,11 @@ function About() {
             <p>
               Statt fertiger Standardsoftware entstehen bei Fundament IT einzelne, passgenaue
               Module — jedes für ein konkretes Problem, kombinierbar je nach Betrieb.
+            </p>
+            <p>
+              Für Produktionsbetriebe arbeiten wir mit einem Spezialisten für Industrieautomation
+              zusammen, der über zehn Jahre Erfahrung mitbringt. Gemeinsam decken wir beides ab: die
+              Verwaltung im Büro und die Steuerung an der Anlage. Ansprechpartner bleibt immer Eray.
             </p>
             <div className="flex items-center gap-4 pt-2">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[var(--violet)] to-[var(--turquoise)] font-display text-xl font-bold text-[var(--blueprint)]">

@@ -1,11 +1,14 @@
+export type ModuleGroup = "verwaltung" | "industrie";
+
 export type ModuleItem = {
   id: string;
   label: string;
   desc: string;
   spec: string;
+  group: ModuleGroup;
 };
 
-export const MODULES: ModuleItem[] = [
+const VERWALTUNG: Omit<ModuleItem, "group">[] = [
   {
     id: "voice",
     label: "KI-Gesprächsassistent",
@@ -62,6 +65,39 @@ export const MODULES: ModuleItem[] = [
   },
 ];
 
+// Produktion & Anlagen — gemeinsam mit unserem Partner für Industrieautomation.
+const INDUSTRIE: Omit<ModuleItem, "group">[] = [
+  {
+    id: "scada",
+    label: "Leitsystem & Visualisierung (SCADA)",
+    desc: "Anlagen live überwachen und steuern — am Leitstand, im Browser, auf dem Handy oder sogar als 3D-Modell.",
+    spec: "LEITSYSTEM · 10",
+  },
+  {
+    id: "produktionsdaten",
+    label: "Produktionsdaten & Berichte",
+    desc: "Alle Daten aus der Produktion zentral sammeln, auswerten und lückenlos zurückverfolgen — vom Rohstoff bis zum Produkt.",
+    spec: "DATEN · 11",
+  },
+  {
+    id: "steuerung",
+    label: "Steuerungstechnik & Schaltschränke",
+    desc: "SPS-/PLC-Programmierung, Schaltschrankbau, Elektro-Montage und Inbetriebnahme aus einer Hand.",
+    spec: "STEUERUNG · 12",
+  },
+  {
+    id: "erp",
+    label: "ERP-Anbindung",
+    desc: "Produktion und Warenwirtschaft verbinden, damit Aufträge und Rezepturen nicht doppelt erfasst werden.",
+    spec: "SCHNITTSTELLE · 13",
+  },
+];
+
+export const MODULES: ModuleItem[] = [
+  ...VERWALTUNG.map((m) => ({ ...m, group: "verwaltung" as const })),
+  ...INDUSTRIE.map((m) => ({ ...m, group: "industrie" as const })),
+];
+
 export type PainPoint = {
   id: string;
   label: string;
@@ -82,6 +118,10 @@ export const PAIN_POINTS: PainPoint[] = MODULES.map((m) => {
     buchhaltung: { label: "Belege und Kontoauszüge werden manuell übertragen", hoursPerWeek: 3 },
     leads: { label: "Neue Anfragen/Leads werden mühsam von Hand gesucht", hoursPerWeek: 3 },
     web: { label: "Keine oder eine veraltete Website", hoursPerWeek: 2 },
+    scada: { label: "Anlagenzustand wird per Rundgang oder Zuruf statt live überwacht", hoursPerWeek: 4 },
+    produktionsdaten: { label: "Produktionsberichte werden von Hand in Excel zusammengestellt", hoursPerWeek: 5 },
+    steuerung: { label: "Anlagen brauchen häufige manuelle Eingriffe oder haben alte Steuerungen", hoursPerWeek: 4 },
+    erp: { label: "Daten zwischen Produktion und ERP werden doppelt erfasst", hoursPerWeek: 3 },
   };
   return { id: m.id, moduleId: m.id, ...copy[m.id] };
 });
@@ -94,6 +134,10 @@ export const BRANCHEN = [
   "Großküchen- / Ausstattungsvertrieb",
   "Immobilien / Verwaltung",
   "Versicherung / Finanzen",
+  "Futtermittel / Landwirtschaft",
+  "Lebensmittelproduktion",
+  "Maschinenbau / Metallverarbeitung",
+  "Kunststoff / Chemie",
   "Sonstige Branche",
 ];
 
