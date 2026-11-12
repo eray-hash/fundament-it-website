@@ -3,7 +3,7 @@ import Reveal from "../components/Reveal";
 
 function DimTick({ label }: { label: string }) {
   return (
-    <div className="font-mono flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[var(--ink-faint)]">
+    <div className="font-mono flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] text-[var(--ink-faint)]">
       <span className="h-px w-4 bg-[var(--ink-faint)]" />
       {label}
     </div>
@@ -65,7 +65,7 @@ function Hero() {
           </a>
           <a
             href="#referenzen"
-            className="font-mono text-[12px] uppercase tracking-[0.12em] text-[var(--ink-dim)] underline decoration-[var(--hairline-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
+            className="font-mono inline-block py-2 text-[12px] uppercase tracking-[0.12em] text-[var(--ink-dim)] underline decoration-[var(--hairline-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
           >
             Referenzen ansehen
           </a>
@@ -103,7 +103,7 @@ function Leistungen() {
                 />
               </div>
               <div className="p-5">
-                <span className="font-mono text-[10px] tracking-[0.15em] text-[var(--ink-faint)]">{l.tag}</span>
+                <span className="font-mono text-[11px] tracking-[0.15em] text-[var(--ink-faint)]">{l.tag}</span>
                 <h3 className="font-display mt-2 text-[16px] font-semibold leading-snug">{l.title}</h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-[var(--ink-dim)]">{l.text}</p>
               </div>
@@ -139,7 +139,7 @@ function Showcase() {
               </div>
               <figcaption className="mt-4">
                 <p className="font-display text-[16px] font-semibold">{s.title}</p>
-                <p className="font-mono mt-1 text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-faint)]">
+                <p className="font-mono mt-1 text-[11px] uppercase tracking-[0.12em] text-[var(--ink-faint)]">
                   {s.sub}
                 </p>
               </figcaption>
@@ -171,7 +171,7 @@ function Referenzen() {
               <div className="flex h-20 w-full items-center justify-center">
                 <img src={r.logo} alt={r.name} loading="lazy" className="max-h-full max-w-full object-contain" />
               </div>
-              <span className="font-mono text-center text-[10px] uppercase tracking-[0.1em] text-[var(--ink-faint)]">
+              <span className="font-mono text-center text-[11px] uppercase tracking-[0.1em] text-[var(--ink-faint)]">
                 {r.name}
               </span>
             </div>

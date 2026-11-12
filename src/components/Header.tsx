@@ -25,7 +25,7 @@ export default function Header() {
         Zum Inhalt springen
       </a>
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link to="/" onClick={close} className="flex items-center gap-2.5" aria-label="Fundament IT – Startseite">
+        <Link to="/" onClick={close} className="-my-2 flex items-center gap-2.5 py-2" aria-label="Fundament IT – Startseite">
           <img src={iconColor} alt="" className="h-6 w-auto" />
           <span className="font-display whitespace-nowrap text-[15px] font-semibold tracking-tight">Fundament IT</span>
         </Link>

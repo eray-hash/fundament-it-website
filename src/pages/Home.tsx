@@ -8,7 +8,7 @@ import { MODULE_ICONS } from "../components/ModuleIcons";
 
 function DimTick({ label, className = "" }: { label: string; className?: string }) {
   return (
-    <div className={`font-mono flex items-center gap-2 text-[10px] uppercase tracking-[0.15em] text-[var(--ink-faint)] ${className}`}>
+    <div className={`font-mono flex items-center gap-2 text-[11px] uppercase tracking-[0.15em] text-[var(--ink-faint)] ${className}`}>
       <span className="h-px w-4 bg-[var(--ink-faint)]" />
       {label}
     </div>
@@ -95,7 +95,7 @@ function Hero() {
             </a>
             <a
               href="#module"
-              className="font-mono text-[12px] uppercase tracking-[0.12em] text-[var(--ink-dim)] underline decoration-[var(--hairline-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
+              className="font-mono inline-block py-2 text-[12px] uppercase tracking-[0.12em] text-[var(--ink-dim)] underline decoration-[var(--hairline-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
             >
               Module ansehen
             </a>
@@ -105,10 +105,10 @@ function Hero() {
         <div className="rise relative hidden items-center justify-center md:flex" style={{ animationDelay: "180ms" }}>
           <div className="relative">
             <img src={iconColor} alt="Fundament IT F-Monogramm" className="h-64 w-auto drop-shadow-[0_0_60px_rgba(124,58,237,0.25)]" />
-            <span className="font-mono absolute -left-10 top-1/2 -translate-y-1/2 -rotate-90 text-[10px] tracking-[0.2em] text-[var(--ink-faint)]">
+            <span className="font-mono absolute -left-10 top-1/2 -translate-y-1/2 -rotate-90 text-[11px] tracking-[0.2em] text-[var(--ink-faint)]">
               512 × 672
             </span>
-            <span className="font-mono absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.2em] text-[var(--ink-faint)]">
+            <span className="font-mono absolute -bottom-8 left-1/2 -translate-x-1/2 text-[11px] tracking-[0.2em] text-[var(--ink-faint)]">
               BAUPLAN F-01
             </span>
             <div className="absolute -inset-10 -z-10 rounded-full border border-dashed border-[var(--hairline)]" />
@@ -123,9 +123,9 @@ function FoundationLine() {
   return (
     <div className="relative border-b border-[var(--hairline)] bg-[var(--blueprint-deep)] py-2">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
-        <span className="font-mono text-[10px] tracking-[0.2em] text-[var(--ink-faint)]">GRUND­RISS · MODULE 01–{String(MODULES.length).padStart(2, "0")}</span>
+        <span className="font-mono text-[11px] tracking-[0.2em] text-[var(--ink-faint)]">GRUND­RISS · MODULE 01–{String(MODULES.length).padStart(2, "0")}</span>
         <span className="h-px flex-1 mx-4 bg-gradient-to-r from-transparent via-[var(--hairline-strong)] to-transparent" />
-        <span className="font-mono text-[10px] tracking-[0.2em] text-[var(--ink-faint)]">ULM · FUNDAMENT-IT.DE</span>
+        <span className="font-mono text-[11px] tracking-[0.2em] text-[var(--ink-faint)]">ULM · FUNDAMENT-IT.DE</span>
       </div>
     </div>
   );
@@ -163,10 +163,10 @@ function ModuleGroupGrid({ title, note, items }: { title: string; note?: string;
   const cols = items.length % 3 === 0 ? "lg:grid-cols-3" : "lg:grid-cols-4";
   return (
     <Reveal className="mt-16">
-      <div className="mb-4 flex items-baseline gap-3">
+      <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h3 className="font-display text-xl font-semibold">{title}</h3>
         {note && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--turquoise-text)]">{note}</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--turquoise-text)]">{note}</span>
         )}
       </div>
       <div className={`grid gap-px overflow-hidden rounded-sm border border-[var(--hairline)] bg-[var(--hairline)] sm:grid-cols-2 ${cols}`}>
@@ -175,7 +175,7 @@ function ModuleGroupGrid({ title, note, items }: { title: string; note?: string;
           return (
             <div key={m.id} className="group relative bg-[var(--blueprint)] p-7 transition hover:bg-[var(--surface-hover)]">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] tracking-[0.15em] text-[var(--ink-faint)]">{m.spec}</span>
+                <span className="font-mono text-[11px] tracking-[0.15em] text-[var(--ink-faint)]">{m.spec}</span>
                 {Icon && (
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--violet-soft)] to-[var(--turquoise-soft)]">
                     <Icon className="h-[18px] w-[18px] text-[var(--ink)]" />
@@ -231,7 +231,7 @@ function IndustrieTeaser() {
               className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
             />
           </div>
-          <p className="font-mono mt-3 text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-faint)]">
+          <p className="font-mono mt-3 text-[11px] uppercase tracking-[0.12em] text-[var(--ink-faint)]">
             Leitstand-Ansicht einer Extruder-Linie · echtes Projekt
           </p>
         </Link>
@@ -297,7 +297,7 @@ function SelfCheck(props: {
                 max={50}
                 value={mitarbeiter}
                 onChange={(e) => setMitarbeiter(Number(e.target.value))}
-                className="mt-3 w-full accent-[var(--turquoise)]"
+                className="mt-3 h-8 w-full cursor-pointer accent-[var(--turquoise)]"
               />
             </div>
 
@@ -335,7 +335,7 @@ function SelfCheck(props: {
           <div className="relative rounded-sm border border-[var(--hairline)] bg-[var(--blueprint)] p-7 md:sticky md:top-24 md:self-start">
             {!submitted || selected.length === 0 ? (
               <div className="flex min-h-[280px] flex-col items-center justify-center text-center">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-faint)]">
+                <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--ink-faint)]">
                   Ergebnis
                 </span>
                 <p className="mt-3 max-w-[26ch] text-[13.5px] text-[var(--ink-faint)]">
@@ -344,7 +344,7 @@ function SelfCheck(props: {
               </div>
             ) : (
               <div>
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--turquoise-text)]">
+                <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--turquoise-text)]">
                   Für {branche.trim() || "euren Betrieb"} · {mitarbeiter} MA
                 </span>
                 <p className="font-display mt-3 text-3xl font-semibold leading-tight">
@@ -353,7 +353,7 @@ function SelfCheck(props: {
                 <p className="text-[13px] text-[var(--ink-dim)]">manuelle Verwaltungsarbeit, grob geschätzt</p>
 
                 <div className="mt-5 rounded-sm border border-[var(--violet)]/30 bg-[var(--violet)]/[0.07] p-4">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--ink-faint)]">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--ink-faint)]">
                     Mögliches Sparpotenzial
                   </span>
                   <p className="font-display mt-1 text-2xl font-semibold text-[var(--turquoise-text)]">
@@ -364,7 +364,7 @@ function SelfCheck(props: {
                   </p>
                 </div>
 
-                <span className="font-mono mt-6 block text-[10px] uppercase tracking-[0.15em] text-[var(--ink-faint)]">
+                <span className="font-mono mt-6 block text-[11px] uppercase tracking-[0.15em] text-[var(--ink-faint)]">
                   Passende Module
                 </span>
                 <ul className="mt-3 space-y-2">
@@ -498,7 +498,7 @@ function Kontakt() {
           >
             Nachricht senden
           </button>
-          <p className="font-mono text-[10.5px] text-[var(--ink-faint)]">
+          <p className="font-mono text-[11px] text-[var(--ink-faint)]">
             Öffnet dein E-Mail-Programm mit vorausgefüllter Nachricht an info@fundament-it.de.
           </p>
         </form>

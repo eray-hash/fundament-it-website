@@ -6,7 +6,7 @@ export default function LegalPage({ title, children }: { title: string; children
     <div className="mx-auto max-w-3xl px-6 py-20">
       <Link
         to="/"
-        className="font-mono inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-[var(--ink-faint)] transition hover:text-[var(--ink)]"
+        className="font-mono inline-flex items-center gap-2 py-2 text-[11px] uppercase tracking-[0.14em] text-[var(--ink-faint)] transition hover:text-[var(--ink)]"
       >
         ← Zurück zur Startseite
       </Link>
