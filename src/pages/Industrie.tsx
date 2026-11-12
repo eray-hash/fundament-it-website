@@ -1,4 +1,5 @@
 import { LEISTUNGEN, REFERENZEN, SHOWCASES } from "../data/industrie";
+import Reveal from "../components/Reveal";
 
 function DimTick({ label }: { label: string }) {
   return (
@@ -26,7 +27,7 @@ function Hero() {
   return (
     <section className="blueprint-grid grain relative overflow-hidden border-b border-[var(--hairline)]">
       <div className="pointer-events-none absolute -right-40 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,var(--turquoise-soft),transparent_70%)]" />
-      <div className="relative mx-auto max-w-6xl px-6 py-24 md:py-28">
+      <div className="rise relative mx-auto max-w-6xl px-6 py-24 md:py-28">
         <DimTick label="Fundament IT — Industrie & Produktion" />
         <h1 className="font-display mt-6 max-w-3xl text-[2.15rem] leading-[1.05] tracking-tight sm:text-6xl sm:leading-[1.02]">
           Automatisierung, die bis in die{" "}
@@ -88,10 +89,10 @@ function Leistungen() {
         </p>
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {LEISTUNGEN.map((l) => (
+          {LEISTUNGEN.map((l, i) => (
+            <Reveal key={l.title} delay={(i % 4) * 90}>
             <article
-              key={l.title}
-              className="group overflow-hidden rounded-sm border border-[var(--hairline)] bg-[var(--blueprint)] transition hover:border-[var(--hairline-strong)]"
+              className="group h-full overflow-hidden rounded-sm border border-[var(--hairline)] bg-[var(--blueprint)] transition hover:border-[var(--hairline-strong)]"
             >
               <div className="aspect-[16/9] overflow-hidden bg-[var(--blueprint-deep)]">
                 <img
@@ -107,6 +108,7 @@ function Leistungen() {
                 <p className="mt-2 text-[13px] leading-relaxed text-[var(--ink-dim)]">{l.text}</p>
               </div>
             </article>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -129,8 +131,9 @@ function Showcase() {
         </p>
 
         <div className="mt-14 grid gap-8 lg:grid-cols-3">
-          {SHOWCASES.map((s) => (
-            <figure key={s.title}>
+          {SHOWCASES.map((s, i) => (
+            <Reveal key={s.title} delay={i * 120}>
+            <figure>
               <div className="overflow-hidden rounded-sm border border-[var(--hairline-strong)] bg-black">
                 <img src={s.image} alt={s.title} loading="lazy" className="aspect-[16/9] w-full object-cover" />
               </div>
@@ -141,6 +144,7 @@ function Showcase() {
                 </p>
               </figcaption>
             </figure>
+            </Reveal>
           ))}
         </div>
       </div>

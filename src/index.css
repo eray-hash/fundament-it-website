@@ -70,6 +70,59 @@ body {
   color: var(--blueprint);
 }
 
+/* sichtbarer Tastatur-Fokus auf allen interaktiven Elementen */
+:focus-visible {
+  outline: 2px solid var(--turquoise-text);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* sanftes Einblenden beim Scrollen (Reveal-Komponente) */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* gestaffeltes Einblenden beim Seitenaufruf (Hero) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal,
+  .rise {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Anker-Ziele nicht unter dem fixierten Header verstecken */
+[id] {
+  scroll-margin-top: 72px;
+}
+
 /* subtle grain — keeps the warm background feeling like paper, not plastic */
 .grain::before {
   content: "";

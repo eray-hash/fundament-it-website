@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import iconColor from "../assets/logo/fundament-it-icon-color.svg";
 import { MODULES, PAIN_POINTS, BRANCHEN, HOURLY_RATE, type ModuleItem } from "../data/modules";
 import { REFERENZEN } from "../data/industrie";
+import Reveal from "../components/Reveal";
 import { MODULE_ICONS } from "../components/ModuleIcons";
 
 function DimTick({ label, className = "" }: { label: string; className?: string }) {
@@ -67,7 +68,7 @@ function Hero() {
       <div className="pointer-events-none absolute -left-24 bottom-0 h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,var(--turquoise-soft),transparent_70%)]" />
 
       <div className="relative mx-auto grid max-w-6xl gap-16 px-6 py-24 md:grid-cols-[1.15fr_0.85fr] md:py-32">
-        <div>
+        <div className="rise">
           <DimTick label="Fundament IT — Automatisierung für Büro und Produktion" />
           <h1 className="font-display mt-6 text-[13vw] leading-[0.98] tracking-tight sm:text-6xl md:text-[4.2rem]">
             Bevor man
@@ -101,7 +102,7 @@ function Hero() {
           </div>
         </div>
 
-        <div className="relative hidden items-center justify-center md:flex">
+        <div className="rise relative hidden items-center justify-center md:flex" style={{ animationDelay: "180ms" }}>
           <div className="relative">
             <img src={iconColor} alt="Fundament IT F-Monogramm" className="h-64 w-auto drop-shadow-[0_0_60px_rgba(124,58,237,0.25)]" />
             <span className="font-mono absolute -left-10 top-1/2 -translate-y-1/2 -rotate-90 text-[10px] tracking-[0.2em] text-[var(--ink-faint)]">
@@ -158,15 +159,17 @@ function Modules() {
 }
 
 function ModuleGroupGrid({ title, note, items }: { title: string; note?: string; items: ModuleItem[] }) {
+  // 9 Module → 3 Spalten, 4 Module → 4 Spalten: so bleibt nie eine leere Restfläche.
+  const cols = items.length % 3 === 0 ? "lg:grid-cols-3" : "lg:grid-cols-4";
   return (
-    <div className="mt-16 first-of-type:mt-16">
+    <Reveal className="mt-16">
       <div className="mb-4 flex items-baseline gap-3">
         <h3 className="font-display text-xl font-semibold">{title}</h3>
         {note && (
           <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--turquoise-text)]">{note}</span>
         )}
       </div>
-      <div className="grid gap-px overflow-hidden rounded-sm border border-[var(--hairline)] bg-[var(--hairline)] sm:grid-cols-2 lg:grid-cols-3">
+      <div className={`grid gap-px overflow-hidden rounded-sm border border-[var(--hairline)] bg-[var(--hairline)] sm:grid-cols-2 ${cols}`}>
         {items.map((m) => {
           const Icon = MODULE_ICONS[m.id];
           return (
@@ -186,7 +189,7 @@ function ModuleGroupGrid({ title, note, items }: { title: string; note?: string;
           );
         })}
       </div>
-    </div>
+    </Reveal>
   );
 }
 
@@ -222,7 +225,7 @@ function IndustrieTeaser() {
         <Link to="/industrie" className="group block">
           <div className="overflow-hidden rounded-sm border border-[var(--hairline-strong)] bg-black shadow-[0_20px_60px_-20px_rgba(30,27,46,0.35)]">
             <img
-              src="/projekte/scada-extruder.png"
+              src="/projekte/scada-extruder.webp"
               alt="SCADA-Leitsystem einer Extruder-Linie"
               loading="lazy"
               className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
@@ -329,9 +332,9 @@ function SelfCheck(props: {
             </button>
           </div>
 
-          <div className="relative rounded-sm border border-[var(--hairline)] bg-[var(--blueprint)] p-7">
+          <div className="relative rounded-sm border border-[var(--hairline)] bg-[var(--blueprint)] p-7 md:sticky md:top-24 md:self-start">
             {!submitted || selected.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center text-center">
+              <div className="flex min-h-[280px] flex-col items-center justify-center text-center">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--ink-faint)]">
                   Ergebnis
                 </span>
@@ -447,7 +450,7 @@ function Kontakt() {
   };
 
   return (
-    <section className="relative py-28">
+    <section id="kontakt" className="relative py-28">
       <div className="mx-auto max-w-3xl px-6">
         <DimTick label="Direkt Kontakt aufnehmen" />
         <h2 className="font-display mt-4 text-4xl leading-tight tracking-tight sm:text-5xl">
