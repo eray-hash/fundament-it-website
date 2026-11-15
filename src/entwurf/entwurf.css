@@ -1,0 +1,616 @@
+/* Entwurf "Monolith": Schwarz/Weiß, großes dünnes Schriftbild, ein eigenes Leitmotiv.
+   Alles unter .ew gekapselt, damit die bestehende Seite unberührt bleibt. */
+
+.ew {
+  --ew-black: #09090a;
+  --ew-coal: #131314;
+  --ew-white: #f3f4f5;
+  --ew-paper: #f1f2f3;
+  --ew-ink: #0d0d0e;
+  --ew-dim-on-dark: #a4a7ad;
+  --ew-dim-on-light: #55585e;
+  --ew-line-dark: rgba(255, 255, 255, 0.14);
+  --ew-line-light: rgba(13, 13, 14, 0.16);
+  --ew-signal: #4ade80;
+  background: var(--ew-black);
+  color: var(--ew-white);
+  font-family: "Geist", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ew *,
+.ew *::before,
+.ew *::after {
+  box-sizing: border-box;
+}
+
+.ew a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ew :focus-visible {
+  outline: 2px solid var(--ew-signal);
+  outline-offset: 4px;
+}
+
+.ew-mono {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ew-wrap {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 56px);
+}
+
+/* ---------- Kopfzeile ---------- */
+
+.ew-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 40;
+  mix-blend-mode: difference;
+  color: #fff;
+}
+.ew-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+.ew-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+.ew-brand svg {
+  height: 22px;
+  width: auto;
+}
+.ew-links {
+  display: flex;
+  gap: clamp(16px, 2.6vw, 40px);
+}
+.ew-links a {
+  padding: 14px 0;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+.ew-links a:hover {
+  opacity: 1;
+}
+@media (max-width: 720px) {
+  .ew-links a:not(.ew-keep) {
+    display: none;
+  }
+}
+
+/* ---------- Hero ---------- */
+
+.ew-hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 620px;
+  overflow: hidden;
+  background: var(--ew-black);
+}
+.ew-monolith {
+  position: absolute;
+  inset: 0;
+}
+.ew-monolith canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ew-hero-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(9, 9, 10, 0.92) 0%, rgba(9, 9, 10, 0.55) 44%, transparent 72%),
+    linear-gradient(180deg, rgba(9, 9, 10, 0.8) 0%, transparent 20%),
+    linear-gradient(0deg, rgba(9, 9, 10, 0.9) 0%, transparent 34%);
+}
+.ew-hero-body {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: clamp(56px, 9vh, 104px);
+}
+.ew-h1 {
+  margin: 20px 0 0;
+  max-width: 13ch;
+  font-size: clamp(44px, 7.2vw, 116px);
+  font-weight: 300;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+.ew-hero-foot {
+  margin-top: clamp(28px, 4.5vh, 48px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 40px;
+}
+.ew-lede {
+  margin: 0;
+  max-width: 44ch;
+  font-size: clamp(16px, 1.25vw, 19px);
+  color: var(--ew-dim-on-dark);
+}
+.ew-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--ew-white);
+  color: var(--ew-ink) !important;
+  font-size: 15px;
+  font-weight: 500;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ew-pill:hover {
+  transform: translateY(-2px);
+}
+.ew-pill-dark {
+  background: var(--ew-ink);
+  color: var(--ew-white) !important;
+}
+.ew-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ew-signal);
+}
+.ew-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ew-dim-on-dark);
+}
+.ew-scroll {
+  position: absolute;
+  right: clamp(20px, 4vw, 56px);
+  bottom: clamp(56px, 9vh, 104px);
+  color: var(--ew-dim-on-dark);
+  writing-mode: vertical-rl;
+}
+@media (max-width: 720px) {
+  .ew-scroll {
+    display: none;
+  }
+  .ew-hero-shade {
+    background: linear-gradient(0deg, rgba(9, 9, 10, 0.96) 0%, rgba(9, 9, 10, 0.55) 46%, transparent 72%);
+  }
+}
+
+/* Hero-Variante: Produktwand */
+.ew-wall {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  perspective: 1500px;
+}
+.ew-wall-plane {
+  position: absolute;
+  top: -30%;
+  right: -12%;
+  width: min(860px, 60%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  transform: rotateX(22deg) rotateY(-18deg) rotateZ(7deg);
+  transform-origin: 60% 40%;
+}
+.ew-wall-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: ew-drift 46s linear infinite;
+}
+.ew-wall-col:nth-child(2) {
+  animation-direction: reverse;
+}
+.ew-wall-col img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--ew-line-dark);
+  filter: brightness(0.85);
+}
+@keyframes ew-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+@media (max-width: 720px) {
+  .ew-wall-plane {
+    width: 150%;
+    right: -40%;
+    top: -34%;
+  }
+}
+
+/* Hero-Varianten mit Platzhalter (Person, Foto) */
+.ew-ph {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+  color: var(--ew-dim-on-dark);
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 14px),
+    linear-gradient(180deg, #1b1b1d, #101011);
+  border: 1px solid var(--ew-line-dark);
+}
+.ew-ph-person {
+  top: 12vh;
+  bottom: 0;
+  right: clamp(20px, 7vw, 120px);
+  width: min(460px, 38vw);
+  border-bottom: 0;
+}
+.ew-ph-photo {
+  inset: 0;
+  border: 0;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding-top: 92px;
+}
+@media (max-width: 720px) {
+  .ew-ph-person {
+    top: 9vh;
+    right: 20px;
+    left: 20px;
+    width: auto;
+    bottom: 46vh;
+    border-bottom: 1px solid var(--ew-line-dark);
+  }
+}
+
+/* ---------- Helle Abschnitte ---------- */
+
+.ew-light {
+  background: var(--ew-paper);
+  color: var(--ew-ink);
+}
+.ew-section {
+  padding-top: clamp(88px, 13vw, 184px);
+  padding-bottom: clamp(88px, 13vw, 184px);
+}
+.ew-label-light {
+  color: var(--ew-dim-on-light);
+}
+.ew-label-dark {
+  color: var(--ew-dim-on-dark);
+}
+
+.ew-statement {
+  margin: 28px 0 0;
+  max-width: 24ch;
+  font-size: clamp(30px, 4.6vw, 68px);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+.ew-statement span {
+  transition: opacity 0.35s linear;
+}
+.ew-sign {
+  margin-top: clamp(40px, 5vw, 72px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 20px;
+}
+.ew-sign-name {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* Laufband mit Projektbildern */
+.ew-reel {
+  overflow: hidden;
+  padding-bottom: clamp(88px, 11vw, 160px);
+}
+.ew-reel-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: ew-reel 70s linear infinite;
+}
+.ew-reel:hover .ew-reel-track {
+  animation-play-state: paused;
+}
+.ew-reel figure {
+  margin: 0;
+  flex: none;
+}
+.ew-reel img {
+  display: block;
+  height: clamp(200px, 28vw, 400px);
+  width: auto;
+  border-radius: 14px;
+}
+.ew-reel figcaption {
+  margin-top: 12px;
+  color: var(--ew-dim-on-light);
+}
+@keyframes ew-reel {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Leistungen (dunkel, vier Spalten mit Haarlinien) ---------- */
+
+.ew-h2 {
+  margin: 24px 0 0;
+  font-size: clamp(40px, 6.4vw, 104px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+.ew-cols {
+  margin-top: clamp(48px, 7vw, 104px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--ew-line-dark);
+}
+.ew-col {
+  padding: 28px 28px 8px 0;
+  border-right: 1px solid var(--ew-line-dark);
+}
+.ew-col + .ew-col {
+  padding-left: 28px;
+}
+.ew-col:last-child {
+  border-right: 0;
+  padding-right: 0;
+}
+.ew-col h3 {
+  margin: 56px 0 0;
+  font-size: clamp(21px, 1.9vw, 28px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+.ew-col p {
+  margin: 14px 0 0;
+  font-size: 15.5px;
+  color: var(--ew-dim-on-dark);
+}
+.ew-col ul {
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14.5px;
+}
+.ew-col li {
+  padding: 11px 0;
+  border-top: 1px solid var(--ew-line-dark);
+}
+@media (max-width: 980px) {
+  .ew-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ew-col:nth-child(2) {
+    border-right: 0;
+  }
+  .ew-col:nth-child(n + 3) {
+    border-top: 1px solid var(--ew-line-dark);
+  }
+  .ew-col:nth-child(3) {
+    padding-left: 0;
+  }
+}
+@media (max-width: 600px) {
+  .ew-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ew-col,
+  .ew-col + .ew-col {
+    padding: 28px 0 8px;
+    border-right: 0;
+  }
+  .ew-col + .ew-col {
+    border-top: 1px solid var(--ew-line-dark);
+  }
+  .ew-col h3 {
+    margin-top: 28px;
+  }
+}
+
+/* ---------- Referenzen ---------- */
+
+.ew-facts {
+  margin-top: clamp(48px, 6vw, 88px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  border-top: 1px solid var(--ew-line-light);
+  padding-top: 24px;
+}
+.ew-fact-n {
+  font-size: clamp(48px, 7vw, 112px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.ew-fact-l {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--ew-dim-on-light);
+  max-width: 22ch;
+}
+.ew-logos {
+  margin-top: clamp(56px, 7vw, 104px);
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--ew-line-light);
+  border: 1px solid var(--ew-line-light);
+}
+.ew-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 2;
+  padding: 18%;
+  background: var(--ew-paper);
+}
+.ew-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: grayscale(1) contrast(1.05);
+  mix-blend-mode: multiply;
+  opacity: 0.8;
+  transition: opacity 0.2s, filter 0.2s;
+}
+.ew-logo:hover img {
+  filter: none;
+  opacity: 1;
+}
+@media (max-width: 900px) {
+  .ew-logos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .ew-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Abschluss ---------- */
+
+.ew-end {
+  padding-top: clamp(96px, 14vw, 208px);
+  padding-bottom: 88px;
+}
+.ew-mail {
+  display: inline-block;
+  margin-top: clamp(32px, 4vw, 56px);
+  padding: 8px 0;
+  font-size: clamp(24px, 4.4vw, 64px);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  border-bottom: 1px solid var(--ew-line-dark);
+  transition: border-color 0.2s;
+  overflow-wrap: anywhere;
+}
+.ew-mail:hover {
+  border-color: var(--ew-white);
+}
+.ew-foot {
+  margin-top: clamp(88px, 12vw, 176px);
+  padding-top: 20px;
+  border-top: 1px solid var(--ew-line-dark);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 32px;
+  color: var(--ew-dim-on-dark);
+}
+.ew-foot a {
+  display: inline-block;
+  padding: 14px 0;
+}
+.ew-foot nav {
+  display: flex;
+  gap: 28px;
+}
+
+/* ---------- Umschalter für die Hero-Varianten (nur im Entwurf) ---------- */
+
+.ew-switch {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  z-index: 60;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  max-width: calc(100vw - 24px);
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(22, 22, 24, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+.ew-switch a {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: #c9ccd1;
+  white-space: nowrap;
+}
+.ew-switch a[aria-current="true"] {
+  background: var(--ew-white);
+  color: var(--ew-ink);
+}
+@media (max-width: 520px) {
+  .ew-switch a {
+    padding: 0 10px;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* ---------- Einblenden ---------- */
+
+.ew-in {
+  animation: ew-rise 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ew-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ew-in,
+  .ew-wall-col,
+  .ew-reel-track {
+    animation: none;
+  }
+  .ew-reel {
+    overflow-x: auto;
+  }
+  .ew-statement span {
+    opacity: 1 !important;
+  }
+}
