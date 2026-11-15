@@ -559,6 +559,8 @@
   align-items: center;
   gap: 2px;
   max-width: calc(100vw - 24px);
+  overflow-x: auto;
+  scrollbar-width: none;
   padding: 4px;
   border-radius: 999px;
   background: rgba(22, 22, 24, 0.9);

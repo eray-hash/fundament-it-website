@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Scene3D from "./Scene3D";
+import Scene3D, { type Motif } from "./Scene3D";
 import { REFERENZEN } from "../data/industrie";
 import "./entwurf.css";
 
-type HeroKind = "lamellen" | "schichten" | "pfaehle" | "module" | "produkte";
+type HeroKind = Motif | "produkte";
 
 const HEROES: { id: HeroKind; label: string }[] = [
   { id: "lamellen", label: "Lamellen" },
   { id: "schichten", label: "Schichten" },
   { id: "pfaehle", label: "Pfähle" },
   { id: "module", label: "Module" },
+  { id: "linien", label: "Linien" },
+  { id: "ringe", label: "Ringe" },
+  { id: "halle", label: "Halle" },
+  { id: "leiterbahnen", label: "Schaltung" },
+  { id: "fliessband", label: "Fließband" },
   { id: "produkte", label: "Produkte" },
 ];
 
@@ -123,6 +128,13 @@ export default function Entwurf() {
   const [params] = useSearchParams();
   const raw = params.get("hero");
   const hero: HeroKind = HEROES.some((h) => h.id === raw) ? (raw as HeroKind) : "lamellen";
+
+  // Am Handy ist der Umschalter breiter als der Bildschirm: aktive Variante sichtbar halten
+  useEffect(() => {
+    const sw = document.querySelector<HTMLElement>(".ew-switch");
+    const cur = sw?.querySelector<HTMLElement>('[aria-current="true"]');
+    if (sw && cur) sw.scrollLeft = cur.offsetLeft - (sw.clientWidth - cur.offsetWidth) / 2;
+  }, [hero]);
 
   useEffect(() => {
     const prev = document.title;

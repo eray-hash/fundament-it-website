@@ -1,9 +1,29 @@
 import { useEffect, useRef } from "react";
 import type * as T from "three";
 
-export type Motif = "schichten" | "pfaehle" | "lamellen" | "module";
+export type Motif =
+  | "schichten"
+  | "pfaehle"
+  | "lamellen"
+  | "module"
+  | "linien"
+  | "ringe"
+  | "halle"
+  | "leiterbahnen"
+  | "fliessband";
 
-type Placement = { z: number; pos: [number, number, number] };
+/** Kleiner, fester Zufallsgenerator: gleiche Zahlenfolge bei jedem Laden. */
+function seeded(seed: number) {
+  let a = seed;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+type Placement = { z: number; pos: [number, number, number]; fog?: [number, number] };
 type Built = {
   update: (t: number, p: number, mx: number, my: number) => void;
   place: (narrow: boolean) => Placement;
@@ -15,6 +35,11 @@ type Built = {
  *  - schichten: gestapelte Platten, die sich zu einem Turm verdrehen (aufstocken)
  *  - pfaehle:   ein Feld aus Gründungspfählen, das wie Gelände atmet (Fundament)
  *  - lamellen:  ein Band aus schmalen Lamellen, durch das eine Welle läuft (Ablauf)
+ *  - linien:       eine Fläche aus feinen Linien, die wie Gelände fließt (Daten)
+ *  - ringe:        ineinander drehende Ringe wie ein Präzisionsinstrument (Abläufe)
+ *  - halle:        ein Gang aus Stützen und Trägern, durch den man langsam geht (Produktion)
+ *  - leiterbahnen: Schaltungsbahnen, über die Lichtimpulse laufen (Steuerung)
+ *  - fliessband:   Kisten auf drei Bahnen, die gleichmäßig durchlaufen (Automatisierung)
  *  - module:    13 Würfel, unten das Fundament, darauf gestuft aufgestockt (13 Module)
  */
 function build(THREE: typeof T, motif: Motif, group: T.Group, mat: T.Material, trash: { dispose(): void }[]): Built {
@@ -99,6 +124,195 @@ function build(THREE: typeof T, motif: Motif, group: T.Group, mat: T.Material, t
         group.rotation.x = my * 0.05;
       },
       place: (narrow) => (narrow ? { z: 15, pos: [0, 2.3, 0] } : { z: 11, pos: [1.4, 0.5, 0] }),
+    };
+  }
+
+  if (motif === "linien") {
+    const ROWS = 64;
+    const COLS = 150;
+    const W = 9;
+    const D = 7;
+    const lmat = new THREE.LineBasicMaterial({ color: 0xd5d8de, transparent: true, opacity: 0.75 });
+    trash.push(lmat);
+    const rows: { attr: T.BufferAttribute; z: number }[] = [];
+    for (let r = 0; r < ROWS; r++) {
+      const arr = new Float32Array(COLS * 3);
+      const z = (r / (ROWS - 1) - 0.5) * D;
+      for (let c = 0; c < COLS; c++) {
+        arr[c * 3] = (c / (COLS - 1) - 0.5) * W;
+        arr[c * 3 + 2] = z;
+      }
+      const g = new THREE.BufferGeometry();
+      const attr = new THREE.BufferAttribute(arr, 3);
+      g.setAttribute("position", attr);
+      trash.push(g);
+      group.add(new THREE.Line(g, lmat));
+      rows.push({ attr, z });
+    }
+    return {
+      update: (t, p, mx, my) => {
+        const amp = 0.9 + p * 0.8;
+        for (const { attr, z } of rows) {
+          const a = attr.array as Float32Array;
+          for (let c = 0; c < COLS; c++) {
+            const x = a[c * 3];
+            const env = Math.exp(-(x * x) / 9);
+            a[c * 3 + 1] =
+              amp *
+              env *
+              (0.55 * Math.sin(x * 1.1 + z * 0.9 + t * 0.5) + 0.45 * Math.sin(x * 2.3 - z * 1.4 - t * 0.35));
+          }
+          attr.needsUpdate = true;
+        }
+        group.rotation.x = 0.5 + my * 0.05;
+        group.rotation.y = -0.35 + mx * 0.12;
+      },
+      place: (narrow) => (narrow ? { z: 17, pos: [0, 2.0, 0] } : { z: 12, pos: [2.2, -0.2, 0] }),
+    };
+  }
+
+  if (motif === "ringe") {
+    const N = 7;
+    const rings: T.Mesh[] = [];
+    for (let i = 0; i < N; i++) {
+      const geo = new THREE.TorusGeometry(0.7 + i * 0.3, 0.028, 12, 180);
+      trash.push(geo);
+      const m = new THREE.Mesh(geo, mat);
+      group.add(m);
+      rings.push(m);
+    }
+    return {
+      update: (t, p, mx, my) => {
+        rings.forEach((m, i) => {
+          const dir = i % 2 ? 1 : -1;
+          m.rotation.x = i * 0.6 + t * 0.16 * dir + p * 0.9 * dir;
+          m.rotation.y = i * 0.9 + t * 0.11 + p * 0.5;
+        });
+        group.rotation.y = mx * 0.25;
+        group.rotation.x = my * 0.12;
+      },
+      place: (narrow) => (narrow ? { z: 18, pos: [0, 2.1, 0] } : { z: 12.5, pos: [2.8, 0.1, 0] }),
+    };
+  }
+
+  if (motif === "halle") {
+    const inner = new THREE.Group();
+    group.add(inner);
+    const SP = 2.4;
+    const N = 22;
+    const H = 4.2;
+    const col = new THREE.BoxGeometry(0.42, H, 0.42);
+    const beam = new THREE.BoxGeometry(5.0, 0.28, 0.42);
+    trash.push(col, beam);
+    for (let i = 0; i < N; i++) {
+      const z = -i * SP;
+      const l = new THREE.Mesh(col, mat);
+      l.position.set(-2.3, H / 2, z);
+      const r = new THREE.Mesh(col, mat);
+      r.position.set(2.3, H / 2, z);
+      const b = new THREE.Mesh(beam, mat);
+      b.position.set(0, H, z);
+      inner.add(l, r, b);
+    }
+    return {
+      update: (t, p, mx, my) => {
+        // gleichmäßiges Vorwärtsgehen; nach einem Stützenabstand wiederholt sich das Bild nahtlos
+        inner.position.z = ((t * 0.35) % SP) + p * 5;
+        group.rotation.y = mx * 0.06;
+        group.rotation.x = my * 0.03;
+      },
+      place: (narrow) =>
+        narrow ? { z: 12, pos: [0, -1.2, 5], fog: [6, 30] } : { z: 12, pos: [1.6, -2.4, 6.5], fog: [5, 32] },
+    };
+  }
+
+  if (motif === "leiterbahnen") {
+    const rnd = seeded(7);
+    const G = 0.35;
+    const lmat = new THREE.LineBasicMaterial({ color: 0xb9bdc5, transparent: true, opacity: 0.9 });
+    const pmat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const padGeo = new THREE.BoxGeometry(0.1, 0.02, 0.1);
+    const pulseGeo = new THREE.BoxGeometry(0.09, 0.09, 0.09);
+    trash.push(lmat, pmat, padGeo, pulseGeo);
+    const segs: number[] = [];
+    const pulses: { m: T.Mesh; pts: T.Vector3[]; cum: number[]; total: number; speed: number; off: number }[] = [];
+    for (let k = 0; k < 46; k++) {
+      let x = -6 + Math.floor(rnd() * 6) * G;
+      let z = (Math.floor(rnd() * 28) - 14) * G;
+      const pts = [new THREE.Vector3(x, 0, z)];
+      const steps = 5 + Math.floor(rnd() * 6);
+      for (let st = 0; st < steps; st++) {
+        if (st % 2 === 0) x += (3 + Math.floor(rnd() * 8)) * G;
+        else z += (Math.floor(rnd() * 7) - 3) * G;
+        pts.push(new THREE.Vector3(x, 0, z));
+      }
+      const cum = [0];
+      for (let j = 0; j < pts.length - 1; j++) {
+        segs.push(pts[j].x, 0, pts[j].z, pts[j + 1].x, 0, pts[j + 1].z);
+        cum.push(cum[j] + pts[j].distanceTo(pts[j + 1]));
+      }
+      for (const end of [pts[0], pts[pts.length - 1]]) {
+        const pad = new THREE.Mesh(padGeo, mat);
+        pad.position.copy(end);
+        group.add(pad);
+      }
+      const m = new THREE.Mesh(pulseGeo, pmat);
+      group.add(m);
+      pulses.push({ m, pts, cum, total: cum[cum.length - 1], speed: 0.7 + rnd() * 1.1, off: rnd() * 20 });
+    }
+    const lg = new THREE.BufferGeometry();
+    lg.setAttribute("position", new THREE.BufferAttribute(new Float32Array(segs), 3));
+    trash.push(lg);
+    group.add(new THREE.LineSegments(lg, lmat));
+    return {
+      update: (t, p, mx, my) => {
+        for (const pl of pulses) {
+          const d = (t * pl.speed + pl.off) % pl.total;
+          let j = 0;
+          while (j < pl.cum.length - 2 && pl.cum[j + 1] < d) j++;
+          const f = (d - pl.cum[j]) / Math.max(pl.cum[j + 1] - pl.cum[j], 1e-6);
+          pl.m.position.lerpVectors(pl.pts[j], pl.pts[j + 1], f);
+        }
+        group.rotation.x = 0.62 + my * 0.05;
+        group.rotation.y = -0.45 + mx * 0.12 + p * 0.2;
+      },
+      place: (narrow) => (narrow ? { z: 17, pos: [0, 1.6, 0] } : { z: 11.5, pos: [2.0, -0.6, 0] }),
+    };
+  }
+
+  if (motif === "fliessband") {
+    const LANES = 3;
+    const PER = 12;
+    const SP = 1.5;
+    const L = PER * SP;
+    const box = new THREE.BoxGeometry(0.62, 0.44, 0.62);
+    const rail = new THREE.BoxGeometry(L, 0.03, 0.05);
+    trash.push(box, rail);
+    const items: { m: T.Mesh; lane: number; i: number }[] = [];
+    for (let lane = 0; lane < LANES; lane++) {
+      const z = (lane - 1) * 1.25;
+      for (const dz of [-0.36, 0.36]) {
+        const r = new THREE.Mesh(rail, mat);
+        r.position.set(0, -0.25, z + dz);
+        group.add(r);
+      }
+      for (let i = 0; i < PER; i++) {
+        const m = new THREE.Mesh(box, mat);
+        m.position.z = z;
+        group.add(m);
+        items.push({ m, lane, i });
+      }
+    }
+    return {
+      update: (t, p, mx, my) => {
+        for (const it of items) {
+          const speed = (0.5 + it.lane * 0.14) * (it.lane === 1 ? -1 : 1) * (1 + p);
+          it.m.position.x = ((((it.i * SP + t * speed) % L) + L) % L) - L / 2;
+        }
+        group.rotation.y = 0.85 + mx * 0.1;
+        group.rotation.x = 0.3 + my * 0.05;
+      },
+      place: (narrow) => (narrow ? { z: 17, pos: [0, 1.8, 0] } : { z: 12, pos: [2.4, -0.3, 0] }),
     };
   }
 
@@ -205,8 +419,8 @@ export default function Scene3D({ motif }: { motif: Motif }) {
           baseZ = pl.z;
           group.position.set(...pl.pos);
           // Nebel wandert mit der Kamera mit, sonst verschwindet das Motiv auf schmalen Bildschirmen
-          fog.near = baseZ - 3;
-          fog.far = baseZ + 8;
+          fog.near = pl.fog ? pl.fog[0] : baseZ - 3;
+          fog.far = pl.fog ? pl.fog[1] : baseZ + 8;
           camera.updateProjectionMatrix();
         };
 
