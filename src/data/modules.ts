@@ -70,13 +70,13 @@ const INDUSTRIE: Omit<ModuleItem, "group">[] = [
   {
     id: "scada",
     label: "Leitsystem & Visualisierung (SCADA)",
-    desc: "Anlagen live überwachen und steuern — am Leitstand, im Browser, auf dem Handy oder sogar als 3D-Modell.",
+    desc: "Anlagen live überwachen und steuern: am Leitstand, im Browser, auf dem Handy oder als 3D-Modell.",
     spec: "LEITSYSTEM · 10",
   },
   {
     id: "produktionsdaten",
     label: "Produktionsdaten & Berichte",
-    desc: "Alle Daten aus der Produktion zentral sammeln, auswerten und lückenlos zurückverfolgen — vom Rohstoff bis zum Produkt.",
+    desc: "Alle Daten aus der Produktion zentral sammeln, auswerten und lückenlos zurückverfolgen, vom Rohstoff bis zum Produkt.",
     spec: "DATEN · 11",
   },
   {
