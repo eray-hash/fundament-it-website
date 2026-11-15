@@ -6,18 +6,14 @@ import "./entwurf.css";
 
 type HeroKind = Motif | "produkte";
 
+// Engere Auswahl für den ersten Bildschirm. Die übrigen Motive bleiben bis zur
+// endgültigen Entscheidung über ?hero=<name> erreichbar.
 const HEROES: { id: HeroKind; label: string }[] = [
-  { id: "lamellen", label: "Lamellen" },
   { id: "schichten", label: "Schichten" },
   { id: "pfaehle", label: "Pfähle" },
-  { id: "module", label: "Module" },
-  { id: "linien", label: "Linien" },
-  { id: "ringe", label: "Ringe" },
-  { id: "halle", label: "Halle" },
-  { id: "leiterbahnen", label: "Schaltung" },
   { id: "fliessband", label: "Fließband" },
-  { id: "produkte", label: "Produkte" },
 ];
+const WEITERE: HeroKind[] = ["lamellen", "module", "linien", "ringe", "halle", "leiterbahnen", "produkte"];
 
 const SHOTS = [
   { src: "/projekte/scada-extruder.webp", cap: "Leitstand · Extruder-Linie" },
@@ -127,7 +123,8 @@ function HeroVisual({ kind }: { kind: HeroKind }) {
 export default function Entwurf() {
   const [params] = useSearchParams();
   const raw = params.get("hero");
-  const hero: HeroKind = HEROES.some((h) => h.id === raw) ? (raw as HeroKind) : "lamellen";
+  const known = HEROES.some((h) => h.id === raw) || WEITERE.includes(raw as HeroKind);
+  const hero: HeroKind = known ? (raw as HeroKind) : "schichten";
 
   // Am Handy ist der Umschalter breiter als der Bildschirm: aktive Variante sichtbar halten
   useEffect(() => {

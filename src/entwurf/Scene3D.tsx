@@ -24,6 +24,12 @@ function seeded(seed: number) {
 }
 
 type Placement = { z: number; pos: [number, number, number]; fog?: [number, number] };
+type Kit = {
+  camera: T.PerspectiveCamera;
+  RoundedBox: new (w: number, h: number, d: number, segments?: number, radius?: number) => T.BufferGeometry;
+};
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+const easeOut = (v: number) => 1 - Math.pow(1 - clamp01(v), 3);
 type Built = {
   update: (t: number, p: number, mx: number, my: number) => void;
   place: (narrow: boolean) => Placement;
@@ -42,62 +48,123 @@ type Built = {
  *  - fliessband:   Kisten auf drei Bahnen, die gleichmäßig durchlaufen (Automatisierung)
  *  - module:    13 Würfel, unten das Fundament, darauf gestuft aufgestockt (13 Module)
  */
-function build(THREE: typeof T, motif: Motif, group: T.Group, mat: T.Material, trash: { dispose(): void }[]): Built {
+function build(
+  THREE: typeof T,
+  kit: Kit,
+  motif: Motif,
+  group: T.Group,
+  mat: T.Material,
+  trash: { dispose(): void }[],
+): Built {
   if (motif === "schichten") {
-    const N = 24;
-    const gap = 0.2;
-    const geo = new THREE.BoxGeometry(3.2, 0.12, 2.0);
-    trash.push(geo);
+    // Unten eine breite Grundplatte (das Fundament), darauf wird Platte für Platte aufgestockt.
+    const N = 22;
+    const gap = 0.215;
+    const baseH = 0.36;
+    const y0 = -2.55;
+    const slabGeo = new kit.RoundedBox(3.1, 0.125, 1.95, 2, 0.028);
+    const baseGeo = new kit.RoundedBox(4.2, baseH, 2.9, 3, 0.04);
+    trash.push(slabGeo, baseGeo);
+    const base = new THREE.Mesh(baseGeo, mat);
+    base.position.y = y0;
+    group.add(base);
     const slabs: T.Mesh[] = [];
     for (let i = 0; i < N; i++) {
-      const m = new THREE.Mesh(geo, mat);
+      const m = new THREE.Mesh(slabGeo, mat);
       group.add(m);
       slabs.push(m);
     }
     return {
       update: (t, p, mx, my) => {
         slabs.forEach((m, i) => {
-          const k = i - (N - 1) / 2;
-          m.position.y = k * gap * (1 + p * 0.6);
-          m.rotation.y = k * 0.085 * (1 + p * 1.2) + Math.sin(t * 0.3 + i * 0.18) * 0.06;
+          // Aufbau beim Laden: jede Platte senkt sich von oben an ihren Platz
+          const u = (t - 0.3 - i * 0.065) / 0.95;
+          const e = easeOut(u);
+          const taper = 1 - (i / (N - 1)) * 0.2;
+          const grow = easeOut(u * 2.5);
+          m.visible = u > 0;
+          m.scale.set(taper * grow, 1, taper * grow);
+          m.position.y = y0 + baseH / 2 + 0.14 + i * gap * (1 + p * 0.5) + (1 - e) * 1.3;
+          m.rotation.y = i * 0.082 * (1 + p * 1.1) + Math.sin(t * 0.3 + i * 0.18) * 0.05 + (1 - e) * 0.7;
         });
-        group.rotation.y = 0.5 + mx * 0.2 + t * 0.04;
-        group.rotation.x = 0.14 + my * 0.06;
+        group.rotation.y = 0.55 + mx * 0.2 + t * 0.035;
+        group.rotation.x = 0.12 + my * 0.06;
       },
-      place: (narrow) => (narrow ? { z: 21, pos: [0, 2.2, 0] } : { z: 13, pos: [2.7, 0, 0] }),
+      place: (narrow) => (narrow ? { z: 25, pos: [0, 2.9, 0] } : { z: 14, pos: [3.1, 0.3, 0] }),
     };
   }
 
   if (motif === "pfaehle") {
-    const G = 30;
-    const sp = 0.22;
+    // Rundes Feld aus Gründungspfählen. Es atmet wie Gelände und hebt sich unter dem Mauszeiger.
+    const G = 46;
+    const sp = 0.2;
+    const R = 4.5;
     const geo = new THREE.BoxGeometry(0.15, 1, 0.15);
     geo.translate(0, 0.5, 0);
     trash.push(geo);
     const inst = new THREE.InstancedMesh(geo, mat, G * G);
     group.add(inst);
     const dummy = new THREE.Object3D();
+    const tint = new THREE.Color();
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    const inv = new THREE.Matrix4();
+    const target = new THREE.Vector3(0, 0, 0);
+    const hit = new THREE.Vector3(0, 0, 0);
+    let hover = 0;
+    let moved = false;
     return {
       update: (t, p, mx, my) => {
+        group.rotation.y = 0.7 + mx * 0.12 + t * 0.02;
+        group.rotation.x = 0.34 + my * 0.05;
+        group.updateMatrixWorld();
+
+        // Wo zeigt die Maus auf das Feld? (Strahl in das Koordinatensystem des Feldes umrechnen)
+        if (mx !== 0 || my !== 0) moved = true;
+        hover += ((moved ? 1 : 0) - hover) * 0.04;
+        ndc.set(mx * 2, -my * 2);
+        ray.setFromCamera(ndc, kit.camera);
+        inv.copy(group.matrixWorld).invert();
+        ray.ray.applyMatrix4(inv);
+        const o = ray.ray.origin;
+        const d = ray.ray.direction;
+        if (Math.abs(d.y) > 1e-4) {
+          const k = -o.y / d.y;
+          if (k > 0) target.set(o.x + d.x * k, 0, o.z + d.z * k);
+        }
+        hit.lerp(target, 0.07);
+
         let n = 0;
         for (let x = 0; x < G; x++) {
           for (let z = 0; z < G; z++) {
             const px = (x - (G - 1) / 2) * sp;
             const pz = (z - (G - 1) / 2) * sp;
-            const edge = Math.max(0, 1 - Math.hypot(px, pz) / 4.4);
-            const wave = 0.5 + 0.5 * Math.sin(px * 1.3 + t * 0.5) * Math.cos(pz * 1.1 - t * 0.35);
-            const h = 0.12 + (1.3 + p * 0.9) * wave * Math.sqrt(edge);
+            const r = Math.hypot(px, pz);
+            const edge = clamp01(1 - r / R);
+            let h = 0;
+            if (edge > 0) {
+              const wave = 0.5 + 0.5 * Math.sin(px * 1.3 + t * 0.5) * Math.cos(pz * 1.1 - t * 0.35);
+              const ring = 0.5 + 0.5 * Math.sin(r * 2.1 - t * 0.8);
+              const dm = (px - hit.x) ** 2 + (pz - hit.z) ** 2;
+              const land = Math.pow(0.72 * wave + 0.28 * ring, 1.6);
+              const rim = edge * edge * (3 - 2 * edge); // weicher Rand, in der Mitte flach
+              h = 0.08 + ((1.9 + p * 0.9) * land + hover * 0.9 * Math.exp(-dm / 0.8)) * Math.min(rim * 2.2, 1);
+              // Aufbau beim Laden: das Feld wächst von der Mitte nach außen
+              h *= easeOut((t - 0.2 - r * 0.24) / 1.2);
+            }
             dummy.position.set(px, 0, pz);
-            dummy.scale.set(1, h, 1);
+            dummy.scale.set(h > 0 ? 1 : 0, Math.max(h, 0.0001), h > 0 ? 1 : 0);
             dummy.updateMatrix();
-            inst.setMatrixAt(n++, dummy.matrix);
+            inst.setMatrixAt(n, dummy.matrix);
+            // hohe Pfähle fangen mehr Licht
+            inst.setColorAt(n, tint.setScalar(0.55 + Math.pow(Math.min(h / 1.9, 1), 1.4) * 2.1));
+            n++;
           }
         }
         inst.instanceMatrix.needsUpdate = true;
-        group.rotation.y = 0.7 + mx * 0.15 + t * 0.03;
-        group.rotation.x = 0.42 + my * 0.05;
+        if (inst.instanceColor) inst.instanceColor.needsUpdate = true;
       },
-      place: (narrow) => (narrow ? { z: 19, pos: [0, 1.6, 0] } : { z: 11.5, pos: [2.5, -0.9, 0] }),
+      place: (narrow) => (narrow ? { z: 19, pos: [0, 1.4, 0] } : { z: 12, pos: [2.9, -1.0, 0] }),
     };
   }
 
@@ -281,34 +348,83 @@ function build(THREE: typeof T, motif: Motif, group: T.Group, mat: T.Material, t
   }
 
   if (motif === "fliessband") {
+    // Drei Bahnen, die Kisten laufen auf den Betrachter zu. An der Schranke werden sie
+    // erfasst: die Lichtleiste blitzt auf, danach trägt die Kiste einen grünen Punkt.
     const LANES = 3;
     const PER = 12;
     const SP = 1.5;
     const L = PER * SP;
-    const box = new THREE.BoxGeometry(0.62, 0.44, 0.62);
-    const rail = new THREE.BoxGeometry(L, 0.03, 0.05);
-    trash.push(box, rail);
-    const items: { m: T.Mesh; lane: number; i: number }[] = [];
+    const LANE_Z = 1.25;
+    const GX = 0.4;
+    const FLOOR = -0.25;
+    const boxGeo = new kit.RoundedBox(0.62, 0.44, 0.62, 3, 0.035);
+    const beltGeo = new THREE.BoxGeometry(L, 0.02, 0.6);
+    const railGeo = new THREE.BoxGeometry(L, 0.06, 0.035);
+    const ledGeo = new THREE.BoxGeometry(0.1, 0.012, 0.1);
+    const postGeo = new THREE.BoxGeometry(0.07, 1.5, 0.07);
+    const beamGeo = new THREE.BoxGeometry(0.07, 0.07, LANE_Z * 2 + 1.34);
+    const barGeo = new THREE.BoxGeometry(0.014, 0.014, 0.66);
+    const beltMat = new THREE.MeshStandardMaterial({ color: 0x131315, metalness: 0.2, roughness: 0.8 });
+    const ledMat = new THREE.MeshBasicMaterial({ color: 0x4ade80 });
+    trash.push(boxGeo, beltGeo, railGeo, ledGeo, postGeo, beamGeo, barGeo, beltMat, ledMat);
+
+    // Schranke
+    const postZ = LANE_Z + 0.67;
+    for (const z of [-postZ, postZ]) {
+      const post = new THREE.Mesh(postGeo, mat);
+      post.position.set(GX, FLOOR + 0.75, z);
+      group.add(post);
+    }
+    const beam = new THREE.Mesh(beamGeo, mat);
+    beam.position.set(GX, FLOOR + 1.5, 0);
+    group.add(beam);
+
+    const bars: T.MeshBasicMaterial[] = [];
+    const items: { m: T.Mesh; led: T.Mesh; lane: number; i: number }[] = [];
+    const off = [0, 0.55, 1.1];
     for (let lane = 0; lane < LANES; lane++) {
-      const z = (lane - 1) * 1.25;
-      for (const dz of [-0.36, 0.36]) {
-        const r = new THREE.Mesh(rail, mat);
-        r.position.set(0, -0.25, z + dz);
+      const z = (lane - 1) * LANE_Z;
+      const belt = new THREE.Mesh(beltGeo, beltMat);
+      belt.position.set(0, FLOOR, z);
+      group.add(belt);
+      for (const dz of [-0.33, 0.33]) {
+        const r = new THREE.Mesh(railGeo, mat);
+        r.position.set(0, FLOOR + 0.02, z + dz);
         group.add(r);
       }
+      const barMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      trash.push(barMat);
+      bars.push(barMat);
+      const bar = new THREE.Mesh(barGeo, barMat);
+      bar.position.set(GX, FLOOR + 1.45, z);
+      group.add(bar);
       for (let i = 0; i < PER; i++) {
-        const m = new THREE.Mesh(box, mat);
-        m.position.z = z;
+        const m = new THREE.Mesh(boxGeo, mat);
+        m.position.set(0, FLOOR + 0.23, z);
+        const led = new THREE.Mesh(ledGeo, ledMat);
+        led.position.set(-0.17, 0.222, 0.17);
+        m.add(led);
         group.add(m);
-        items.push({ m, lane, i });
+        items.push({ m, led, lane, i });
       }
     }
+    let last = 0;
     return {
       update: (t, p, mx, my) => {
+        const dt = Math.min(Math.max(t - last, 0), 0.1);
+        last = t;
+        const near = [0, 0, 0];
+        for (let lane = 0; lane < LANES; lane++) off[lane] += dt * (0.5 + lane * 0.13) * (1 + p * 1.2);
         for (const it of items) {
-          const speed = (0.5 + it.lane * 0.14) * (it.lane === 1 ? -1 : 1) * (1 + p);
-          it.m.position.x = ((((it.i * SP + t * speed) % L) + L) % L) - L / 2;
+          const x = L / 2 - ((it.i * SP + off[it.lane]) % L);
+          it.m.position.x = x;
+          // hinter der Schranke (zum Betrachter hin) ist die Kiste erfasst
+          const done = clamp01((GX - x) / 0.3);
+          it.led.visible = done > 0;
+          it.led.scale.setScalar(Math.max(done, 0.001));
+          near[it.lane] = Math.max(near[it.lane], 1 - Math.min(Math.abs(x - GX) / 0.45, 1));
         }
+        bars.forEach((b, lane) => b.color.setScalar(0.16 + 0.84 * near[lane]));
         group.rotation.y = 0.85 + mx * 0.1;
         group.rotation.x = 0.3 + my * 0.05;
       },
@@ -373,6 +489,7 @@ export default function Scene3D({ motif }: { motif: Motif }) {
       try {
         const THREE = await import("three");
         const { RoomEnvironment } = await import("three/examples/jsm/environments/RoomEnvironment.js");
+        const { RoundedBoxGeometry } = await import("three/examples/jsm/geometries/RoundedBoxGeometry.js");
         if (disposed) return;
 
         const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -397,7 +514,8 @@ export default function Scene3D({ motif }: { motif: Motif }) {
         const trash: { dispose(): void }[] = [mat, env, pmrem];
         const group = new THREE.Group();
         scene.add(group);
-        const built = build(THREE, motif, group, mat, trash);
+        const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 80);
+        const built = build(THREE, { camera, RoundedBox: RoundedBoxGeometry }, motif, group, mat, trash);
 
         const key = new THREE.DirectionalLight(0xffffff, 3.4);
         key.position.set(-4, 5, 6);
@@ -407,7 +525,6 @@ export default function Scene3D({ motif }: { motif: Motif }) {
         scene.add(rim);
         scene.add(new THREE.AmbientLight(0xffffff, 0.12));
 
-        const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 80);
         let baseZ = 12;
 
         const resize = () => {
@@ -431,6 +548,7 @@ export default function Scene3D({ motif }: { motif: Motif }) {
           my = e.clientY / window.innerHeight - 0.5;
         };
 
+        const STILL = 12; // Zeitpunkt des Standbilds bei "Bewegung reduzieren": Aufbau ist abgeschlossen
         const clock = new THREE.Clock();
         let raf = 0;
         const draw = (t: number) => {
@@ -448,12 +566,12 @@ export default function Scene3D({ motif }: { motif: Motif }) {
 
         const onResize = () => {
           resize();
-          if (reduce) draw(0);
+          if (reduce) draw(STILL);
         };
         resize();
         window.addEventListener("resize", onResize);
         if (reduce) {
-          draw(0);
+          draw(STILL);
         } else {
           window.addEventListener("mousemove", onMouse, { passive: true });
           loop();
