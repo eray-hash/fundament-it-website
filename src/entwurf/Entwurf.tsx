@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import Monolith from "./Monolith";
+import Scene3D from "./Scene3D";
 import { REFERENZEN } from "../data/industrie";
 import "./entwurf.css";
 
-type HeroKind = "3d" | "produkte" | "person" | "foto";
+type HeroKind = "lamellen" | "schichten" | "pfaehle" | "module" | "produkte";
 
 const HEROES: { id: HeroKind; label: string }[] = [
-  { id: "3d", label: "3D-Grafik" },
+  { id: "lamellen", label: "Lamellen" },
+  { id: "schichten", label: "Schichten" },
+  { id: "pfaehle", label: "Pfähle" },
+  { id: "module", label: "Module" },
   { id: "produkte", label: "Produkte" },
-  { id: "person", label: "Person" },
-  { id: "foto", label: "Foto" },
 ];
 
 const SHOTS = [
@@ -100,34 +101,20 @@ function Statement({ text }: { text: string }) {
 }
 
 function HeroVisual({ kind }: { kind: HeroKind }) {
-  if (kind === "3d") return <Monolith />;
-  if (kind === "produkte") {
-    const colA = [SHOTS[0], SHOTS[2], SHOTS[4]];
-    const colB = [SHOTS[1], SHOTS[3], SHOTS[5]];
-    return (
-      <div className="ew-wall" aria-hidden="true">
-        <div className="ew-wall-plane">
-          {[colA, colB].map((col, c) => (
-            <div key={c} className="ew-wall-col">
-              {[...col, ...col].map((s, i) => (
-                <img key={i} src={s.src} alt="" />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  if (kind === "person") {
-    return (
-      <div className="ew-ph ew-ph-person">
-        <span className="ew-mono">Platzhalter · hier steht dein Porträt, schwarz-weiß</span>
-      </div>
-    );
-  }
+  if (kind !== "produkte") return <Scene3D motif={kind} />;
+  const colA = [SHOTS[0], SHOTS[2], SHOTS[4]];
+  const colB = [SHOTS[1], SHOTS[3], SHOTS[5]];
   return (
-    <div className="ew-ph ew-ph-photo">
-      <span className="ew-mono">Platzhalter · echtes Foto aus Halle oder Büro, schwarz-weiß, vollflächig</span>
+    <div className="ew-wall" aria-hidden="true">
+      <div className="ew-wall-plane">
+        {[colA, colB].map((col, c) => (
+          <div key={c} className="ew-wall-col">
+            {[...col, ...col].map((s, i) => (
+              <img key={i} src={s.src} alt="" />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -135,7 +122,7 @@ function HeroVisual({ kind }: { kind: HeroKind }) {
 export default function Entwurf() {
   const [params] = useSearchParams();
   const raw = params.get("hero");
-  const hero: HeroKind = HEROES.some((h) => h.id === raw) ? (raw as HeroKind) : "3d";
+  const hero: HeroKind = HEROES.some((h) => h.id === raw) ? (raw as HeroKind) : "lamellen";
 
   useEffect(() => {
     const prev = document.title;

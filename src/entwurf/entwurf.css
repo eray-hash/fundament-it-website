@@ -579,9 +579,14 @@
   color: var(--ew-ink);
 }
 @media (max-width: 520px) {
+  .ew-switch {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
   .ew-switch a {
-    padding: 0 10px;
-    letter-spacing: 0.08em;
+    padding: 0 8px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
   }
 }
 
